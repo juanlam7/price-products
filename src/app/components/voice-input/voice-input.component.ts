@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { PricesService } from '../../services/prices-service.service';
 
 @Component({
   selector: 'app-voice-input',
@@ -28,11 +29,12 @@ import { Component, computed, signal } from '@angular/core';
       @if (detectedPrices().length > 0) {
       <div class="mt-4">
         <h2 class="text-lg font-semibold">Detected Prices:</h2>
-        <ul class="list-disc mt-2">
-          @for (price of detectedPrices(); track price; let idx = $index) {
+        <ul class="list-disc mt-2 hide-scrollbar overflow-y-auto max-h-96">
+          @for (price of detectedPrices(); track price + idx; let idx = $index)
+          {
           <li class="text-green-500">
             <div class="flex justify-between items-center">
-              <div>
+              <div class="text-xl">
                 {{ price }}
               </div>
               <div>
@@ -55,9 +57,11 @@ import { Component, computed, signal } from '@angular/core';
   `,
 })
 export class VoiceInputComponent {
+  pricesService = inject(PricesService);
+
   recognition!: SpeechRecognition;
   listening = signal<boolean>(false);
-  detectedPrices = signal<string[]>(['12', '2.24', '9']);
+  detectedPrices = signal<string[]>([]);
 
   summaryPrices = computed(() => {
     const sum = this.detectedPrices().reduce((accumulator, currentValue) => {
@@ -68,6 +72,7 @@ export class VoiceInputComponent {
   });
 
   constructor() {
+    this.loadPrices();
     const SpeechRecognition =
       (window as any).SpeechRecognition ||
       (window as any).webkitSpeechRecognition;
@@ -106,11 +111,23 @@ export class VoiceInputComponent {
       (_, index) => index !== priceIndex
     );
     this.detectedPrices.set(newArray);
+    this.savePrices();
   }
 
   extractPrices(transcript: string): void {
     const prices = transcript.match(/\d+(\.\d{1,2})?/g) || [];
     this.detectedPrices.update((val) => (val ? [...val, ...prices] : prices));
     this.stopListening();
+    this.savePrices();
+  }
+
+  savePrices(): void {
+    this.pricesService.savePrices(this.detectedPrices());
+  }
+
+  loadPrices(): void {
+    this.pricesService
+      .getPrices()
+      .subscribe((item) => this.detectedPrices.set(item));
   }
 }
