@@ -7,36 +7,56 @@ import { convertWordsToNumber } from '../../utils/strings';
   selector: 'app-voice-input',
   imports: [CommonModule],
   template: `
-    <div class="flex flex-col items-center p-4 space-y-4 h-screen bg-slate-900">
-      <h1 class="text-xl font-bold text-white">Voice Price Reader</h1>
-      <button
-        (click)="startListening()"
-        class="bg-lime-600 text-white px-4 py-2 rounded"
-        [disabled]="listening()"
+    <div class="flex flex-col items-center space-y-4 h-screen bg-gray-900">
+      <nav
+        class="flex justify-between w-full border border-input border-zinc-600 bg-slate-800 p-4"
       >
-        {{ listening() ? 'Listening...' : 'Start Speaking' }}
-      </button>
-      <button
-        (click)="stopListening()"
-        [ngClass]="{
-          'bg-red-500 text-white': listening(),
-          'bg-gray-300 text-gray-500': !listening()
-        }"
-        class="px-4 py-2 rounded"
-        [disabled]="!listening"
-      >
-        Stop
-      </button>
+        <h1 class="text-xl font-bold text-white">Items counter</h1>
+        <button
+          (click)="deleteAll()"
+          class="bg-slate-700 text-white px-4 py-2 rounded"
+          [disabled]="listening()"
+        >
+          <div class="flex items-center justify-center">
+            <span>Clear</span>
+            <img src="/clear.svg" class="ml-1 w-6 h-6" alt="Custom Icon" />
+          </div>
+        </button>
+      </nav>
+      <div class="flex justify-around w-full p-4">
+        <button
+          (click)="startListening()"
+          class="bg-slate-700 text-white px-4 py-2 rounded w-full mr-1"
+          [disabled]="listening()"
+        >
+          <div class="flex items-center justify-center">
+            <span>{{ listening() ? 'Listening...' : 'Start Speaking' }}</span>
+            <img src="/microphone.svg" class="ml-1 w-4 h-4" alt="Custom Icon" />
+          </div>
+        </button>
+        <button
+          (click)="stopListening()"
+          class="px-4 py-2 rounded bg-red-500 text-white w-full ml-1"
+          [disabled]="!listening"
+        >
+          <div class="flex items-center justify-center">
+            <span>Stop listening</span>
+            <img src="/stop.svg" class="ml-4 w-4 h-4" alt="Custom Icon" />
+          </div>
+        </button>
+      </div>
       @if (detectedPrices().length > 0) {
-      <h2 class="text-lg font-semibold text-white">Detected Prices:</h2>
+      <h2 class="text-lg font-semibold text-white">
+        Items summary: {{ summaryPrices() }}
+      </h2>
       <div class="overflow-x-auto overflow-y-auto px-6 hide-scrollbar">
         <ul class="w-[17.5rem] shrink-0">
           @for (price of detectedPrices(); track price + idx; let idx = $index)
           {
           <li
-            class="flex justify-between items-center text-green-500 border border-input rounded border-slate-800 my-2"
+            class="flex justify-between items-center border border-input rounded border-zinc-600 my-2 bg-slate-500"
           >
-            <div class="text-xl px-2">
+            <div class="text-xl text-slate-200 px-2 bg-slate-700">
               {{ price }}
             </div>
             <div>
@@ -45,16 +65,17 @@ import { convertWordsToNumber } from '../../utils/strings';
                 class="text-white text-xs px-2 py-1"
                 [disabled]="listening()"
               >
-                X
+                <img
+                  src="/clear-rounded.svg"
+                  class="w-4 h-4"
+                  alt="Custom Icon"
+                />
               </button>
             </div>
           </li>
           }
         </ul>
       </div>
-      <h3 class="text-lg font-semibold text-white mt-4">
-        Summary: {{ summaryPrices() }}
-      </h3>
       }
     </div>
   `,
@@ -115,6 +136,11 @@ export class VoiceInputComponent {
       (_, index) => index !== priceIndex
     );
     this.detectedPrices.set(newArray);
+    this.savePrices();
+  }
+
+  deleteAll() {
+    this.detectedPrices.set([]);
     this.savePrices();
   }
 

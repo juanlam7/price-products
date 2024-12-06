@@ -1,8 +1,8 @@
 {
   "name": "price-products",
   "short_name": "price-products",
-  "theme_color": "#1976d2",
-  "background_color": "#fafafa",
+  "theme_color": "#1E293B",
+  "background_color": "#1E293B",
   "display": "standalone",
   "scope": "./",
   "start_url": "./",
