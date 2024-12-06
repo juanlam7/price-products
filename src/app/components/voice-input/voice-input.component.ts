@@ -1,16 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { PricesService } from '../../services/prices-service.service';
+import { convertWordsToNumber } from '../../utils/strings';
 
 @Component({
   selector: 'app-voice-input',
   imports: [CommonModule],
   template: `
-    <div class="flex flex-col items-center p-4 space-y-4">
-      <h1 class="text-xl font-bold">Voice Price Reader</h1>
+    <div class="flex flex-col items-center p-4 space-y-4 h-screen bg-slate-900">
+      <h1 class="text-xl font-bold text-white">Voice Price Reader</h1>
       <button
         (click)="startListening()"
-        class="bg-blue-500 text-white px-4 py-2 rounded"
+        class="bg-lime-600 text-white px-4 py-2 rounded"
         [disabled]="listening()"
       >
         {{ listening() ? 'Listening...' : 'Start Speaking' }}
@@ -27,31 +28,33 @@ import { PricesService } from '../../services/prices-service.service';
         Stop
       </button>
       @if (detectedPrices().length > 0) {
-      <div class="mt-4">
-        <h2 class="text-lg font-semibold">Detected Prices:</h2>
-        <ul class="list-disc mt-2 hide-scrollbar overflow-y-auto max-h-96">
+      <h2 class="text-lg font-semibold text-white">Detected Prices:</h2>
+      <div class="overflow-x-auto overflow-y-auto px-6 hide-scrollbar">
+        <ul class="w-[17.5rem] shrink-0">
           @for (price of detectedPrices(); track price + idx; let idx = $index)
           {
-          <li class="text-green-500">
-            <div class="flex justify-between items-center">
-              <div class="text-xl">
-                {{ price }}
-              </div>
-              <div>
-                <button
-                  (click)="deletePrice(idx)"
-                  class="text-black text-xs px-2 py-1 rounded border border-input"
-                  [disabled]="listening()"
-                >
-                  X
-                </button>
-              </div>
+          <li
+            class="flex justify-between items-center text-green-500 border border-input rounded border-slate-800 my-2"
+          >
+            <div class="text-xl px-2">
+              {{ price }}
+            </div>
+            <div>
+              <button
+                (click)="deletePrice(idx)"
+                class="text-white text-xs px-2 py-1"
+                [disabled]="listening()"
+              >
+                X
+              </button>
             </div>
           </li>
           }
         </ul>
-        <h3 class="text-lg font-semibold">Summary: {{ summaryPrices() }}</h3>
       </div>
+      <h3 class="text-lg font-semibold text-white mt-4">
+        Summary: {{ summaryPrices() }}
+      </h3>
       }
     </div>
   `,
@@ -81,8 +84,9 @@ export class VoiceInputComponent {
       this.recognition.lang = 'es-ES';
       this.recognition.interimResults = false;
       this.recognition.onresult = (event: SpeechRecognitionEvent) => {
-        const transcript = event.results[0][0].transcript;
-        this.extractPrices(transcript);
+        const transcript = event.results[0][0].transcript.toLowerCase();
+        const processedTranscript = convertWordsToNumber(transcript);
+        this.extractPrices(processedTranscript);
       };
       this.recognition.onerror = (event: any) => {
         console.error('Speech recognition error:', event);
