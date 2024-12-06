@@ -82,7 +82,7 @@ export function convertWordsToNumber(input: string) {
   return `${integerNumber}.${fractionalStr}`;
 }
 
-function isValidSpanishNumber(value: string) {
+export function isValidSpanishNumber(value: string) {
   const regex = /^[+-]?(\d+(\.\d+)?|\.\d+)$/;
   return !regex.test(value);
 }

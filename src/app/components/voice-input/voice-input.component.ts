@@ -1,7 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { PricesService } from '../../services/prices-service.service';
-import { convertWordsToNumber } from '../../utils/strings';
+import {
+  convertWordsToNumber,
+  isValidSpanishNumber,
+} from '../../utils/strings';
 
 @Component({
   selector: 'app-voice-input',
@@ -11,7 +14,7 @@ import { convertWordsToNumber } from '../../utils/strings';
       <nav
         class="flex justify-between w-full border border-input border-zinc-600 bg-slate-800 p-4"
       >
-        <h1 class="text-xl font-bold text-white">Items counter</h1>
+        <h1 class="text-xl font-bold text-white italic">Items counter</h1>
         <button
           (click)="deleteAll()"
           class="bg-slate-700 text-white px-4 py-2 rounded"
@@ -25,6 +28,16 @@ import { convertWordsToNumber } from '../../utils/strings';
       </nav>
       <div class="flex justify-around w-full p-4">
         <button
+          (click)="manualEdit.set(!manualEdit())"
+          class="bg-slate-700 text-white px-4 py-2 rounded w-full mr-1"
+          [disabled]="listening()"
+        >
+          <div class="flex items-center justify-center">
+            <span>{{ manualEdit() ? 'Close manual' : 'Add manual' }}</span>
+            <img src="/pencil.svg" class="ml-1 w-4 h-4" alt="Custom Icon" />
+          </div>
+        </button>
+        <button
           (click)="startListening()"
           class="bg-slate-700 text-white px-4 py-2 rounded w-full mr-1"
           [disabled]="listening()"
@@ -36,16 +49,36 @@ import { convertWordsToNumber } from '../../utils/strings';
         </button>
         <button
           (click)="stopListening()"
-          class="px-4 py-2 rounded bg-red-500 text-white w-full ml-1"
+          class="px-4 py-2 rounded bg-red-500 text-white w-full max-w-20"
           [disabled]="!listening"
         >
           <div class="flex items-center justify-center">
-            <span>Stop listening</span>
-            <img src="/stop.svg" class="ml-4 w-4 h-4" alt="Custom Icon" />
+            <span>Stop</span>
+            <img src="/stop.svg" class="ml-2 w-4 h-4" alt="Custom Icon" />
           </div>
         </button>
       </div>
-      @if (detectedPrices().length > 0) {
+      @if (manualEdit()) {
+      <div class="flex text-white justify-around w-full px-4">
+        <label for="price" class="self-center">Price: </label>
+        <input
+          id="price"
+          #addPriceInput
+          type="text"
+          placeholder="Enter a price"
+          class="w-full px-2 py-2 border border-zinc-600 max-w-28 bg-slate-500 rounded focus:border-blue-500 focus:bg-slate-500 focus:outline-none"
+        />
+        <button
+          class="bg-slate-700 text-white px-4 py-2 rounded"
+          (click)="addPrice(addPriceInput.value); addPriceInput.value = ''"
+        >
+          <div class="flex items-center justify-center">
+            <span>Add Price</span>
+            <img src="/plus.svg" class="ml-1 w-4 h-4" alt="Custom Icon" />
+          </div>
+        </button>
+      </div>
+      } @if (detectedPrices().length > 0) {
       <h2 class="text-lg font-semibold text-white">
         Items summary: {{ summaryPrices() }}
       </h2>
@@ -62,12 +95,12 @@ import { convertWordsToNumber } from '../../utils/strings';
             <div>
               <button
                 (click)="deletePrice(idx)"
-                class="text-white text-xs px-2 py-1"
+                class="text-white text-xs px-2 align-top"
                 [disabled]="listening()"
               >
                 <img
                   src="/clear-rounded.svg"
-                  class="w-4 h-4"
+                  class="w-6 h-6"
                   alt="Custom Icon"
                 />
               </button>
@@ -86,6 +119,7 @@ export class VoiceInputComponent {
   recognition!: SpeechRecognition;
   listening = signal<boolean>(false);
   detectedPrices = signal<string[]>([]);
+  manualEdit = signal<boolean>(false);
 
   summaryPrices = computed(() => {
     const sum = this.detectedPrices().reduce((accumulator, currentValue) => {
@@ -159,5 +193,14 @@ export class VoiceInputComponent {
     this.pricesService
       .getPrices()
       .subscribe((item) => this.detectedPrices.set(item));
+  }
+
+  addPrice(price: string): void {
+    if (price.trim() && !isValidSpanishNumber(price.trim())) {
+      this.detectedPrices.update((val) =>
+        val ? [...val, price.padStart(2, '0')] : [price.padStart(2, '0')]
+      );
+      this.savePrices();
+    }
   }
 }
