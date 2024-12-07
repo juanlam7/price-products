@@ -25,7 +25,7 @@ import { ClearBtnComponent } from '../clear-btn/clear-btn.component';
           [disabled]="listening()"
         >
           <div class="flex items-center justify-center">
-            <span>{{ manualEdit() ? 'Close manual' : 'Add manual' }}</span>
+            <span>{{ manualEdit() ? 'Close manual' : 'Manual price' }}</span>
             <img src="/pencil.svg" class="ml-1 w-4 h-4" alt="Custom Icon" />
           </div>
         </button>
@@ -57,7 +57,7 @@ import { ClearBtnComponent } from '../clear-btn/clear-btn.component';
           id="price"
           #addPriceInput
           type="text"
-          placeholder="Enter a price"
+          placeholder="E.g. 3.68"
           class="w-full px-2 py-2 border border-zinc-600 max-w-28 bg-slate-500 rounded focus:border-blue-500 focus:bg-slate-500 focus:outline-none"
         />
         <button
@@ -71,8 +71,14 @@ import { ClearBtnComponent } from '../clear-btn/clear-btn.component';
         </button>
       </div>
       } @if (detectedPrices().length > 0) {
-      <h2 class="text-lg font-semibold text-white">
-        Items summary: {{ summaryPrices() }}
+      <h2
+        class="flex text-lg font-semibold text-black bg-slate-500 rounded pl-2"
+      >
+        Items summary:
+        <span
+          class="text-xl text-slate-200 bg-slate-700 h-full ml-1 px-2 rounded-r"
+          >{{ summaryPrices() }}</span
+        >
       </h2>
       <div class="overflow-x-auto overflow-y-auto px-6 hide-scrollbar">
         <ul class="w-[17.5rem] shrink-0">
