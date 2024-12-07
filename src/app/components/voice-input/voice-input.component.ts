@@ -5,26 +5,18 @@ import {
   convertWordsToNumber,
   isValidSpanishNumber,
 } from '../../utils/strings';
+import { ClearBtnComponent } from '../clear-btn/clear-btn.component';
 
 @Component({
   selector: 'app-voice-input',
-  imports: [CommonModule],
+  imports: [CommonModule, ClearBtnComponent],
   template: `
     <div class="flex flex-col items-center space-y-4 h-screen bg-gray-900">
       <nav
         class="flex justify-between w-full border border-input border-zinc-600 bg-slate-800 p-4"
       >
         <h1 class="text-xl font-bold text-white italic">Items counter</h1>
-        <button
-          (click)="deleteAll()"
-          class="bg-slate-700 text-white px-4 py-2 rounded"
-          [disabled]="listening()"
-        >
-          <div class="flex items-center justify-center">
-            <span>Clear</span>
-            <img src="/clear.svg" class="ml-1 w-6 h-6" alt="Custom Icon" />
-          </div>
-        </button>
+        <app-clear-btn (deleteAll)="deleteAll()" />
       </nav>
       <div class="flex justify-around w-full p-4">
         <button
