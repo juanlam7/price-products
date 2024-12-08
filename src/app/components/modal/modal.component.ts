@@ -8,7 +8,7 @@ import { Component, EventEmitter, Output } from '@angular/core';
       (click)="closeModalOnBackdropClick($event)"
     >
       <div
-        class="bg-slate-800 rounded-lg shadow-lg p-6 w-96"
+        class="bg-slate-800 rounded-lg shadow-lg p-6"
         (click)="$event.stopPropagation()"
       >
         <ng-content />

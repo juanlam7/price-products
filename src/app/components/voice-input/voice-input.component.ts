@@ -32,7 +32,7 @@ import { ClearBtnComponent } from '../clear-btn/clear-btn.component';
           [disabled]="listening()"
         >
           <div class="flex items-center justify-center">
-            <span>{{ manualEdit() ? 'Close manual' : 'Manual price' }}</span>
+            <span>{{ manualEdit() ? 'Close' : 'Enter price' }}</span>
             <img src="/pencil.svg" class="ml-1 w-4 h-4" alt="Custom Icon" />
           </div>
         </button>
@@ -42,7 +42,7 @@ import { ClearBtnComponent } from '../clear-btn/clear-btn.component';
           [disabled]="listening()"
         >
           <div class="flex items-center justify-center">
-            <span>{{ listening() ? 'Listening...' : 'Start Speaking' }}</span>
+            <span>{{ listening() ? 'Listening...' : 'Say price' }}</span>
             <img src="/microphone.svg" class="ml-1 w-4 h-4" alt="Custom Icon" />
           </div>
         </button>
@@ -59,13 +59,12 @@ import { ClearBtnComponent } from '../clear-btn/clear-btn.component';
       </div>
       @if (manualEdit()) {
       <div class="flex text-white justify-around w-full px-4">
-        <label for="price" class="self-center">Price: </label>
         <input
           id="price"
           #addPriceInput
           type="text"
           placeholder="E.g. 3.68"
-          class="w-full px-2 py-2 border border-zinc-600 max-w-28 bg-slate-500 rounded focus:border-blue-500 focus:bg-slate-500 focus:outline-none"
+          class="w-full px-2 py-2 border border-zinc-600 max-w-48 bg-slate-500 rounded focus:border-blue-500 focus:bg-slate-500 focus:outline-none"
         />
         <button
           class="bg-slate-700 text-white px-4 py-2 rounded"
@@ -141,54 +140,39 @@ import { ClearBtnComponent } from '../clear-btn/clear-btn.component';
   `,
 })
 export class VoiceInputComponent {
+  private cdr = inject(ChangeDetectorRef);
+  private pricesService = inject(PricesService);
+
+  listening = signal<boolean>(false);
+  detectedPrices = signal<string[]>([]);
+  manualEdit = signal<boolean>(false);
+
   showBottomButton = true;
   isDivScrollable = false;
   checkOnChange = false;
+
+  summaryPrices = computed(() =>
+    this.detectedPrices()
+      .reduce((sum, price) => sum + parseFloat(price), 0)
+      .toFixed(2)
+  );
+
+  private recognition: SpeechRecognition | null = null;
+
+  constructor() {
+    this.initSpeechRecognition();
+    this.loadPrices();
+  }
 
   ngAfterViewInit() {
     this.cdr.detectChanges();
   }
 
-  onScrollBottom(isAtBottom: boolean) {
-    this.showBottomButton = !isAtBottom;
-  }
-
-  onScrollable(isScrollable: boolean) {
-    this.isDivScrollable = isScrollable;
-    this.cdr.detectChanges();
-  }
-
-  scrollToTop(scrollableDiv: HTMLElement) {
-    scrollableDiv.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  scrollToBottom(scrollableDiv: HTMLElement) {
-    scrollableDiv.scrollTo({
-      top: scrollableDiv.scrollHeight,
-      behavior: 'smooth',
-    });
-  }
-
-  pricesService = inject(PricesService);
-
-  recognition!: SpeechRecognition;
-  listening = signal<boolean>(false);
-  detectedPrices = signal<string[]>([]);
-  manualEdit = signal<boolean>(false);
-
-  summaryPrices = computed(() => {
-    const sum = this.detectedPrices().reduce((accumulator, currentValue) => {
-      return accumulator + parseFloat(currentValue);
-    }, 0);
-
-    return sum.toFixed(2);
-  });
-
-  constructor(private cdr: ChangeDetectorRef) {
-    this.loadPrices();
+  private initSpeechRecognition() {
     const SpeechRecognition =
       (window as any).SpeechRecognition ||
       (window as any).webkitSpeechRecognition;
+
     if (SpeechRecognition) {
       this.recognition = new SpeechRecognition();
       this.recognition.lang = 'es-ES';
@@ -206,58 +190,81 @@ export class VoiceInputComponent {
     }
   }
 
-  startListening(): void {
+  onScrollBottom(isAtBottom: boolean) {
+    this.showBottomButton = !isAtBottom;
+  }
+
+  onScrollable(isScrollable: boolean) {
+    this.isDivScrollable = isScrollable;
+    this.cdr.detectChanges();
+  }
+
+  scrollToTop(element: HTMLElement) {
+    element.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  scrollToBottom(element: HTMLElement) {
+    element.scrollTo({ top: element.scrollHeight, behavior: 'smooth' });
+  }
+
+  startListening() {
     if (this.recognition) {
       this.listening.set(true);
       this.recognition.start();
     }
   }
 
-  stopListening(): void {
+  stopListening() {
     if (this.recognition) {
       this.listening.set(false);
       this.recognition.stop();
     }
   }
 
-  deletePrice(priceIndex: number) {
-    const newArray = this.detectedPrices().filter(
-      (_, index) => index !== priceIndex
+  addPrice(price: string) {
+    if (price.trim() && !isValidSpanishNumber(price.trim())) {
+      this.detectedPrices.update((prices) => [
+        ...prices,
+        price.padStart(2, '0'),
+      ]);
+      this.triggerChange();
+    }
+  }
+
+  deletePrice(index: number) {
+    this.detectedPrices.update((prices) =>
+      prices.filter((_, i) => i !== index)
     );
-    this.detectedPrices.set(newArray);
-    this.checkOnChange = !this.checkOnChange;
-    this.savePrices();
+    this.triggerChange();
   }
 
   deleteAll() {
     this.detectedPrices.set([]);
-    this.savePrices();
+    this.triggerChange();
   }
 
-  extractPrices(transcript: string): void {
+  private extractPrices(transcript: string) {
     const prices = transcript.match(/\d+(\.\d{1,2})?/g) || [];
-    this.detectedPrices.update((val) => (val ? [...val, ...prices] : prices));
+    this.detectedPrices.update((currentPrices) => [
+      ...currentPrices,
+      ...prices,
+    ]);
     this.stopListening();
     this.savePrices();
   }
 
-  savePrices(): void {
+  private loadPrices() {
+    this.pricesService
+      .getPrices()
+      .subscribe((prices) => this.detectedPrices.set(prices));
+  }
+
+  private savePrices() {
     this.pricesService.savePrices(this.detectedPrices());
   }
 
-  loadPrices(): void {
-    this.pricesService
-      .getPrices()
-      .subscribe((item) => this.detectedPrices.set(item));
-  }
-
-  addPrice(price: string): void {
-    if (price.trim() && !isValidSpanishNumber(price.trim())) {
-      this.detectedPrices.update((val) =>
-        val ? [...val, price.padStart(2, '0')] : [price.padStart(2, '0')]
-      );
-      this.checkOnChange = !this.checkOnChange;
-      this.savePrices();
-    }
+  private triggerChange() {
+    this.checkOnChange = !this.checkOnChange;
+    this.savePrices();
   }
 }
