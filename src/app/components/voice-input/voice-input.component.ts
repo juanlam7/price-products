@@ -1,6 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { PricesService } from '../../services/prices-service.service';
+import { ScrollPositionDirective } from '../../utils/scroll-position.directive';
 import {
   convertWordsToNumber,
   isValidSpanishNumber,
@@ -9,7 +16,7 @@ import { ClearBtnComponent } from '../clear-btn/clear-btn.component';
 
 @Component({
   selector: 'app-voice-input',
-  imports: [CommonModule, ClearBtnComponent],
+  imports: [CommonModule, ClearBtnComponent, ScrollPositionDirective],
   template: `
     <div class="flex flex-col items-center space-y-4 h-screen bg-gray-900">
       <nav
@@ -80,7 +87,14 @@ import { ClearBtnComponent } from '../clear-btn/clear-btn.component';
           >{{ summaryPrices() }}</span
         >
       </h2>
-      <div class="overflow-x-auto overflow-y-auto px-6 hide-scrollbar">
+      <div
+        class="overflow-x-auto overflow-y-auto px-6 hide-scrollbar"
+        appScrollPosition
+        [checkOnChange]="checkOnChange"
+        (atBottom)="onScrollBottom($event)"
+        (isScrollable)="onScrollable($event)"
+        #scrollableDiv
+      >
         <ul class="w-[17.5rem] shrink-0">
           @for (price of detectedPrices(); track price + idx; let idx = $index)
           {
@@ -107,11 +121,54 @@ import { ClearBtnComponent } from '../clear-btn/clear-btn.component';
           }
         </ul>
       </div>
-      }
+      @if (isDivScrollable) {
+      <div class="flex justify-center space-x-4 min-h-10">
+        <button
+          (click)="
+            showBottomButton
+              ? scrollToBottom(scrollableDiv)
+              : scrollToTop(scrollableDiv)
+          "
+          class="bg-slate-700 text-white px-4 py-2 mb-1 rounded text-xs"
+        >
+          {{ showBottomButton ? 'Bottom' : 'Top' }}
+        </button>
+      </div>
+      } @else {
+      <div class="min-h-5"></div>
+      } }
     </div>
   `,
 })
 export class VoiceInputComponent {
+  showBottomButton = true;
+  isDivScrollable = false;
+  checkOnChange = false;
+
+  ngAfterViewInit() {
+    this.cdr.detectChanges();
+  }
+
+  onScrollBottom(isAtBottom: boolean) {
+    this.showBottomButton = !isAtBottom;
+  }
+
+  onScrollable(isScrollable: boolean) {
+    this.isDivScrollable = isScrollable;
+    this.cdr.detectChanges();
+  }
+
+  scrollToTop(scrollableDiv: HTMLElement) {
+    scrollableDiv.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  scrollToBottom(scrollableDiv: HTMLElement) {
+    scrollableDiv.scrollTo({
+      top: scrollableDiv.scrollHeight,
+      behavior: 'smooth',
+    });
+  }
+
   pricesService = inject(PricesService);
 
   recognition!: SpeechRecognition;
@@ -127,7 +184,7 @@ export class VoiceInputComponent {
     return sum.toFixed(2);
   });
 
-  constructor() {
+  constructor(private cdr: ChangeDetectorRef) {
     this.loadPrices();
     const SpeechRecognition =
       (window as any).SpeechRecognition ||
@@ -168,6 +225,7 @@ export class VoiceInputComponent {
       (_, index) => index !== priceIndex
     );
     this.detectedPrices.set(newArray);
+    this.checkOnChange = !this.checkOnChange;
     this.savePrices();
   }
 
@@ -198,6 +256,7 @@ export class VoiceInputComponent {
       this.detectedPrices.update((val) =>
         val ? [...val, price.padStart(2, '0')] : [price.padStart(2, '0')]
       );
+      this.checkOnChange = !this.checkOnChange;
       this.savePrices();
     }
   }
