@@ -36,6 +36,7 @@ const numberWords: { [key: string]: number } = {
   setenta: 70,
   ochenta: 80,
   noventa: 90,
+  cien: 100,
   ciento: 100,
   doscientos: 200,
   trescientos: 300,
