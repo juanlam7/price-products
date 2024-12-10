@@ -87,3 +87,13 @@ export function isValidSpanishNumber(value: string) {
   const regex = /^[+-]?(\d+(\.\d+)?|\.\d+)$/;
   return !regex.test(value);
 }
+
+export function extractDescriptionAndPrice(transcript: string) {
+  const regex = /producto (.+?) y precio (.+)/;
+  const match = transcript.match(regex);
+
+  if (match) {
+    return [`${match[1].trim()}: ${convertWordsToNumber(match[2])}`];
+  }
+  return [];
+}

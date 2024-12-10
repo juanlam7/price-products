@@ -6,12 +6,12 @@ import {
   signal,
   WritableSignal,
 } from '@angular/core';
-import { convertWordsToNumber } from '../../utils/strings';
+import { extractDescriptionAndPrice } from '../../utils/strings';
 
 @Component({
   selector: 'app-controls',
   template: `
-    <div class="flex justify-around w-full p-4">
+    <div class="flex justify-around w-full px-4 pt-4">
       <button
         (click)="manualEdit().set(!manualEdit()())"
         class="bg-slate-700 text-white px-4 py-2 rounded w-full mr-1"
@@ -42,6 +42,11 @@ import { convertWordsToNumber } from '../../utils/strings';
         </div>
       </button>
     </div>
+    @if (listening()) {
+    <p class="text-slate-500 text-sm">
+      Add your item this way "Producto queso y precio 3.73"
+    </p>
+    }
   `,
 })
 export class ControlsComponent {
@@ -68,8 +73,7 @@ export class ControlsComponent {
       this.recognition.interimResults = false;
       this.recognition.onresult = (event: SpeechRecognitionEvent) => {
         const transcript = event.results[0][0].transcript.toLowerCase();
-        const processedTranscript = convertWordsToNumber(transcript);
-        this.extractPrices(processedTranscript);
+        this.extractPrices(transcript);
       };
       this.recognition.onerror = (event: any) => {
         console.error('Speech recognition error:', event);
@@ -94,7 +98,8 @@ export class ControlsComponent {
   }
 
   private extractPrices(transcript: string) {
-    const prices = transcript.match(/\d+(\.\d{1,2})?/g) || [];
+    const getValue = extractDescriptionAndPrice(transcript);
+    const prices = getValue || [];
     this.detectedPrices().update((currentPrices) => [
       ...currentPrices,
       ...prices,

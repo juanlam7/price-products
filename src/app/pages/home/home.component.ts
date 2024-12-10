@@ -4,7 +4,6 @@ import { HeaderComponent } from '../../components/header/header.component';
 import { ManualEditComponent } from '../../components/manual-edit/manual-edit.component';
 import { PriceListComponent } from '../../components/price-list/price-list.component';
 import { PricesService } from '../../services/prices-service.service';
-import { isValidSpanishNumber } from '../../utils/strings';
 
 @Component({
   selector: 'app-home',
@@ -55,13 +54,9 @@ export class HomeComponent {
   }
 
   addPrice(price: string) {
-    if (price.trim() && !isValidSpanishNumber(price.trim())) {
-      this.detectedPrices.update((prices) => [
-        ...prices,
-        price.padStart(2, '0'),
-      ]);
-      this.triggerChange();
-    }
+    this.detectedPrices.update((prices) => [...prices, price.padStart(2, '0')]);
+    this.triggerChange();
+    this.manualEdit.set(false);
   }
 
   deletePrice(index: number) {

@@ -29,7 +29,7 @@ import { UpDownComponent } from '../up-down/up-down.component';
         <li
           class="flex justify-between items-center border border-input rounded border-zinc-600 my-2 bg-slate-500"
         >
-          <div class="text-xl text-slate-200 px-2 bg-slate-700">
+          <div class="text-xl text-slate-200 px-2 bg-slate-700 capitalize">
             {{ price }}
           </div>
           <div>

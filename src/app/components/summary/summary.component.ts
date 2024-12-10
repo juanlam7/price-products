@@ -19,6 +19,8 @@ export class SummaryComponent {
 
   summaryPrices = computed(() =>
     this.detectedPrices()
+      .filter((item) => item)
+      .map((item) => item.split(': ')[1])
       .reduce((sum, price) => sum + parseFloat(price), 0)
       .toFixed(2)
   );
