@@ -10,7 +10,7 @@ import { Component, input } from '@angular/core';
             ? scrollToBottom(scrollableDiv())
             : scrollToTop(scrollableDiv())
         "
-        class="bg-slate-700 text-white p-2 rounded text-xs"
+        class="border text-white p-2 rounded text-xs"
       >
         <div class="flex items-center justify-center">
           <img

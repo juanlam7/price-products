@@ -14,7 +14,7 @@ import { PricesService } from '../../services/prices-service.service';
     PriceListComponent,
   ],
   template: `
-    <div class="flex flex-col items-center space-y-4 h-screen bg-gray-900">
+    <div class="flex flex-col items-center space-y-4 h-screen">
       <app-header class="contents" (deleteAll)="deleteAll()"></app-header>
 
       <app-controls

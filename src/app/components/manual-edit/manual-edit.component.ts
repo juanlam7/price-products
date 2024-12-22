@@ -68,7 +68,7 @@ import {
 
       <button
         type="submit"
-        class="bg-slate-700 text-white px-4 py-2 rounded ml-4 self-center"
+        class="border text-white px-4 py-2 rounded ml-4 self-center"
         [disabled]="manualEditForm.invalid"
       >
         <div class="flex items-center justify-center">

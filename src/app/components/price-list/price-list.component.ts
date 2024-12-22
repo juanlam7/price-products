@@ -17,7 +17,7 @@ import { UpDownComponent } from '../up-down/up-down.component';
   template: `
     <app-summary [detectedPrices]="detectedPrices()" />
     <div
-      class="overflow-x-auto overflow-y-auto px-6 hide-scrollbar"
+      class="overflow-x-auto overflow-y-auto px-8 rounded hide-scrollbar"
       appScrollPosition
       [checkOnChange]="checkOnChange()"
       (atBottom)="onScrollBottom($event)"
@@ -50,7 +50,7 @@ import { UpDownComponent } from '../up-down/up-down.component';
       [scrollableDiv]="scrollableDiv"
     />
     } @else {
-    <div class="min-h-5"></div>
+    <div class="min-h-15"></div>
     }
   `,
   imports: [

@@ -14,7 +14,7 @@ import { extractDescriptionAndPrice } from '../../utils/strings';
     <div class="flex justify-around w-full px-4 pt-4">
       <button
         (click)="manualEdit().set(!manualEdit()())"
-        class="bg-slate-700 text-white px-4 py-2 rounded w-full mr-1"
+        class="border text-white px-4 py-2 rounded w-full mr-1"
         [disabled]="listening()"
       >
         <div class="flex items-center justify-center">
@@ -24,7 +24,7 @@ import { extractDescriptionAndPrice } from '../../utils/strings';
       </button>
       <button
         (click)="startListening()"
-        class="bg-slate-700 text-white px-4 py-2 rounded w-full mr-1"
+        class="border text-white px-4 py-2 rounded w-full mr-1"
         [disabled]="listening()"
       >
         <div class="flex items-center justify-center">
@@ -34,7 +34,7 @@ import { extractDescriptionAndPrice } from '../../utils/strings';
       </button>
       <button
         (click)="stopListening()"
-        class="px-4 py-2 rounded bg-red-500 text-white w-full max-w-20"
+        class="px-4 py-2 rounded border border-red-500 text-white w-full max-w-20"
       >
         <div class="flex items-center justify-center">
           <span>Stop</span>
@@ -43,7 +43,7 @@ import { extractDescriptionAndPrice } from '../../utils/strings';
       </button>
     </div>
     @if (listening()) {
-    <p class="text-slate-500 text-sm">
+    <p class="text-slate-200 text-sm shadow-md bg-gray-400 backdrop-filter backdrop-blur-lg bg-opacity-0 p-4 rounded-md">
       Add your item this way "Producto queso y precio 3.73"
     </p>
     }

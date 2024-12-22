@@ -8,12 +8,12 @@ import { ModalComponent } from '../modal/modal.component';
   imports: [ModalComponent, CommonModule],
   template: `
     <button
-      class="bg-slate-700 text-white px-4 py-2 rounded"
+      class="border text-white px-4 py-2 rounded"
       (click)="openModal()"
     >
       <div class="flex items-center justify-center">
         <span>Reset</span>
-        <img src="/clear.svg" class="ml-1 w-6 h-6" alt="Custom Icon" />
+        <img src="/reset.svg" class="ml-2 w-6 h-6" alt="Custom Icon" />
       </div>
     </button>
 
