@@ -12,26 +12,28 @@ import {
   selector: '[appScrollPosition]',
 })
 export class ScrollPositionDirective implements AfterViewInit {
-  @Input() checkOnChange: boolean = false;
   @Output() atBottom: EventEmitter<boolean> = new EventEmitter();
   @Output() isScrollable: EventEmitter<boolean> = new EventEmitter();
-
-  private scrollThreshold: number = 0;
+  private resizeObserver!: ResizeObserver;
+  private scrollThreshold: number = 20;
 
   constructor(private elementRef: ElementRef) {}
 
   ngAfterViewInit() {
-    this.checkScrollable();
+    this.setupResizeObserver();
     this.checkScrollPosition();
-  }
-
-  ngOnChanges() {
-    this.checkScrollable();
   }
 
   @HostListener('scroll', [])
   onScroll() {
     this.checkScrollPosition();
+  }
+
+  private setupResizeObserver() {
+    this.resizeObserver = new ResizeObserver(() => {
+      requestAnimationFrame(() => this.checkScrollable());
+    });
+    this.resizeObserver.observe(this.elementRef.nativeElement);
   }
 
   private checkScrollable() {
@@ -50,5 +52,11 @@ export class ScrollPositionDirective implements AfterViewInit {
       scrollTop + clientHeight >= scrollHeight - this.scrollThreshold;
 
     this.atBottom.emit(isAtBottom);
+  }
+
+  ngOnDestroy() {
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+    }
   }
 }

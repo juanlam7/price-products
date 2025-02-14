@@ -35,7 +35,6 @@ import { PricesService } from '../../services/prices-service.service';
       <app-price-list
         class="contents"
         [detectedPrices]="detectedPrices()"
-        [checkOnChange]="checkOnChange()"
         (deletePrice)="deletePrice($event)"
       ></app-price-list>
       }
@@ -47,7 +46,6 @@ export class HomeComponent {
 
   detectedPrices = signal<string[]>([]);
   manualEdit = signal<boolean>(false);
-  checkOnChange = signal<boolean>(false);
 
   constructor() {
     this.loadPrices();
@@ -82,7 +80,6 @@ export class HomeComponent {
   }
 
   triggerChange() {
-    this.checkOnChange.set(!this.checkOnChange());
     this.savePrices();
   }
 }

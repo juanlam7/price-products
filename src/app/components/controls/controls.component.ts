@@ -11,7 +11,7 @@ import { extractDescriptionAndPrice } from '../../utils/strings';
 @Component({
   selector: 'app-controls',
   template: `
-    <div class="flex justify-around w-full px-4 pt-4">
+    <div class="flex justify-around w-full px-4 pt-4 max-w-xl">
       <button
         (click)="manualEdit().set(!manualEdit()())"
         class="border text-white px-4 py-2 rounded w-full mr-1"

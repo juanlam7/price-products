@@ -19,7 +19,6 @@ import { UpDownComponent } from '../up-down/up-down.component';
     <div
       class="overflow-x-auto overflow-y-auto px-8 rounded hide-scrollbar"
       appScrollPosition
-      [checkOnChange]="checkOnChange()"
       (atBottom)="onScrollBottom($event)"
       (isScrollable)="onScrollable($event)"
       #scrollableDiv
@@ -61,7 +60,6 @@ import { UpDownComponent } from '../up-down/up-down.component';
   ],
 })
 export class PriceListComponent {
-  checkOnChange = input.required<boolean>();
   detectedPrices = input.required<string[]>();
 
   showBottomButton = signal<boolean>(true);
